@@ -18,6 +18,7 @@ namespace System.Collections.Concurrent
         private readonly ConcurrentDictionary<int, string> _forThreads = new ConcurrentDictionary<int, string>();
         private readonly List<T> _list = new List<T>();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+
         public int Count
         {
             get

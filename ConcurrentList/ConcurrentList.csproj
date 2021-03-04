@@ -2,11 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>System.Collections.Concurrent.ConcurrentList</PackageId>
+    <PackageId>ConcurrentList</PackageId>
     <Authors>Translucency Software</Authors>
     <Description>A simple, lock-based implementation of a thread-safe list.</Description>
     <Copyright>© 2021 Translucency Software</Copyright>
     <RepositoryUrl>https://github.com/lucent-sea/ConcurrentList</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/lucent-sea/ConcurrentList</PackageProjectUrl>
+    <PackageIcon>T.png</PackageIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="NuGet\T.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
