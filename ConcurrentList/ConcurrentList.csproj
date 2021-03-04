@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>System.Collections.Concurrent.ConcurrentList</PackageId>
+    <Authors>Translucency Software</Authors>
+    <Description>A simple, lock-based implementation of a thread-safe list.</Description>
+    <Copyright>© 2021 Translucency Software</Copyright>
+    <RepositoryUrl>https://github.com/lucent-sea/ConcurrentList</RepositoryUrl>
+  </PropertyGroup>
+
+</Project>
