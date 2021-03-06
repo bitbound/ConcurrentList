@@ -10,7 +10,6 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/lucent-sea/ConcurrentList</PackageProjectUrl>
     <PackageIcon>T.png</PackageIcon>
-    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
