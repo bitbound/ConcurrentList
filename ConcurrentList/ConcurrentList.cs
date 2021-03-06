@@ -18,6 +18,7 @@ namespace System.Collections.Concurrent
         private readonly ConcurrentDictionary<int, string> _forThreads = new ConcurrentDictionary<int, string>();
         private readonly List<T> _list = new List<T>();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
+        private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
 
         public int Count
         {
@@ -128,10 +129,13 @@ namespace System.Collections.Concurrent
         /// this ConcurrentList from within the supplied action.
         /// </summary>
         /// <param name="iterateAction">An Action that takes the current index as a parameter.</param>
-        /// <returns>Awaitable task.</returns>
-        public async Task ForAsync(Action<int> action)
+        /// <returns>Exceptions thrown within the loop and from within queued actions.</returns>
+        public async Task<List<Exception>> ForAsync(Action<int> action)
         {
             CheckForLoopThreads();
+
+            var exceptions = new List<Exception>();
+
             try
             {
                 await _lock.WaitAsync();
@@ -142,12 +146,20 @@ namespace System.Collections.Concurrent
                 {
                     action.Invoke(i);
                 }
+
+                ProcessActions(exceptions);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
             }
             finally
             {
                 _forThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             }
+
+            return exceptions;
         }
 
         /// <summary>
@@ -155,10 +167,13 @@ namespace System.Collections.Concurrent
         /// this ConcurrentList from within the supplied action.
         /// </summary>
         /// <param name="action">An action that takes the current List item as a parameter.</param>
-        /// <returns></returns>
-        public async Task ForEachAsync(Action<T> action)
+        /// <returns>Exceptions thrown within the loop and from within queued actions.</returns>
+        public async Task<List<Exception>> ForEachAsync(Action<T> action)
         {
             CheckForLoopThreads();
+
+            var exceptions = new List<Exception>();
+
             try
             {
                 await _lock.WaitAsync();
@@ -169,12 +184,20 @@ namespace System.Collections.Concurrent
                 {
                     action.Invoke(item);
                 }
+
+                ProcessActions(exceptions);
+            }
+            catch (Exception ex)
+            {
+                exceptions.Add(ex);
             }
             finally
             {
                 _forThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             }
+
+            return exceptions;
         }
 
         public IEnumerator<T> GetEnumerator()
@@ -184,7 +207,7 @@ namespace System.Collections.Concurrent
             try
             {
                 _lock.Wait();
-                return _list.GetEnumerator();
+                return _list.ToList().GetEnumerator();
             }
             finally
             {
@@ -198,7 +221,7 @@ namespace System.Collections.Concurrent
             try
             {
                 _lock.Wait();
-                return _list.GetEnumerator();
+                return _list.ToList().GetEnumerator();
             }
             finally
             {
@@ -232,6 +255,16 @@ namespace System.Collections.Concurrent
             {
                 _lock.Release();
             }
+        }
+
+        public void QueueAction(Action action)
+        {
+            if (!_forThreads.ContainsKey(Thread.CurrentThread.ManagedThreadId))
+            {
+                throw new InvalidOperationException("You can only queue actions from within a " +
+                    $"{nameof(ForAsync)} or {nameof(ForEachAsync)} loop.");
+            }
+            _actionQueue.Enqueue(action);
         }
 
         public bool Remove(T item)
@@ -268,6 +301,21 @@ namespace System.Collections.Concurrent
             {
                 throw new InvalidOperationException("Unable to access ConcurrentList members from within a " +
                     $"{nameof(ForAsync)} or {nameof(ForEachAsync)} loop.");
+            }
+        }
+
+        private void ProcessActions(List<Exception> exceptions)
+        {
+            while (_actionQueue.TryDequeue(out var action))
+            {
+                try
+                {
+                    action.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Add(ex);
+                }
             }
         }
     }

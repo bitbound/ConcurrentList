@@ -71,25 +71,23 @@ namespace ConcurrentList.Tests
         [TestMethod]
         public void ForAsync_GivenMemberReentrancy_Throws()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            var result = _list.ForAsync(i =>
             {
-                _list.ForAsync(i =>
-                {
-                    _list.Add(3);
-                }).GetAwaiter().GetResult();
-            });
+                _list.Add(3);
+            }).GetAwaiter().GetResult();
+
+            Assert.IsTrue(result.First() is InvalidOperationException);
         }
 
         [TestMethod]
         public void ForEachAsync_GivenMemberReentrancy_Throws()
         {
-            Assert.ThrowsException<InvalidOperationException>(() =>
+            var result = _list.ForEachAsync(item =>
             {
-                _list.ForEachAsync(item =>
-                {
-                    _list.Remove(item);
-                }).GetAwaiter().GetResult();
-            });
+                _list.Remove(item);
+            }).GetAwaiter().GetResult();
+
+            Assert.IsTrue(result.First() is InvalidOperationException);
         }
 
 
@@ -157,5 +155,55 @@ namespace ConcurrentList.Tests
             reset.WaitOne();
         }
 
+        [TestMethod]
+        public void QueueAction_GivenNotInLoop_Throws()
+        {
+            Assert.ThrowsException<InvalidOperationException>(() =>
+            {
+                _list.QueueAction(() => Console.WriteLine("Test"));
+            });
+        }
+
+        [TestMethod]
+        public void QueueAction_GivenFromWithinForEachLoop_ExecutesAction()
+        {
+            var count1 = 0;
+            var count2 = 0;
+
+            var exceptions = _list.ForEachAsync(item =>
+            {
+                count1++;
+
+                _list.QueueAction(() =>
+                {
+                    count2++;
+                });
+            }).GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, exceptions.Count);
+            Assert.AreEqual(500_000, count1);
+            Assert.AreEqual(500_000, count2);
+        }
+
+        [TestMethod]
+        public void QueueAction_GivenFromWithinForLoop_ExecutesAction()
+        {
+            var count1 = 0;
+            var count2 = 0;
+
+            var exceptions = _list.ForAsync(item =>
+            {
+                count1++;
+
+                _list.QueueAction(() =>
+                {
+                    count2++;
+                });
+            }).GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, exceptions.Count);
+            Assert.AreEqual(500_000, count1);
+            Assert.AreEqual(500_000, count2);
+        }
     }
 }
