@@ -16,7 +16,7 @@ namespace System.Collections.Concurrent
     /// <typeparam name="T"></typeparam>
     public class ConcurrentList<T> : IList<T>
     {
-        private readonly ConcurrentDictionary<int, string> _forThreads = new ConcurrentDictionary<int, string>();
+        private readonly ConcurrentDictionary<int, string> _loopThreads = new ConcurrentDictionary<int, string>();
         private readonly List<T> _list = new List<T>();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
 
@@ -24,7 +24,7 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                CheckForLoopThreads();
+                CheckLoopThreads();
                 try
                 {
                     _lock.Wait();
@@ -43,7 +43,7 @@ namespace System.Collections.Concurrent
         {
             get
             {
-                CheckForLoopThreads();
+                CheckLoopThreads();
                 try
                 {
                     _lock.Wait();
@@ -56,7 +56,7 @@ namespace System.Collections.Concurrent
             }
             set
             {
-                CheckForLoopThreads();
+                CheckLoopThreads();
                 try
                 {
                     _lock.Wait();
@@ -70,7 +70,7 @@ namespace System.Collections.Concurrent
         }
         public void Add(T item)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -84,7 +84,7 @@ namespace System.Collections.Concurrent
 
         public void Clear()
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -98,7 +98,7 @@ namespace System.Collections.Concurrent
 
         public bool Contains(T item)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -112,7 +112,7 @@ namespace System.Collections.Concurrent
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -132,12 +132,12 @@ namespace System.Collections.Concurrent
         /// <returns>Awaitable task.</returns>
         public async Task ForAsync(Action<int> action)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 await _lock.WaitAsync();
 
-                _forThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
+                _loopThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
 
                 for (var i = 0; i < _list.Count; i++)
                 {
@@ -146,7 +146,7 @@ namespace System.Collections.Concurrent
             }
             finally
             {
-                _forThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
+                _loopThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             }
         }
@@ -159,12 +159,12 @@ namespace System.Collections.Concurrent
         /// <returns></returns>
         public async Task ForEachAsync(Action<T> action)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 await _lock.WaitAsync();
 
-                _forThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
+                _loopThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
 
                 foreach (var item in _list)
                 {
@@ -173,20 +173,23 @@ namespace System.Collections.Concurrent
             }
             finally
             {
-                _forThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
+                _loopThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
 
             _lock.Wait();
+
+            _loopThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
 
             var enumerator = new ObservableEnumerator<T>(_list);
             enumerator.Disposed += (sender, args) =>
             {
+                _loopThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             };
 
@@ -197,13 +200,16 @@ namespace System.Collections.Concurrent
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
 
             _lock.Wait();
+
+            _loopThreads.TryAdd(Thread.CurrentThread.ManagedThreadId, string.Empty);
 
             var enumerator = new ObservableEnumerator<T>(_list);
             enumerator.Disposed += (sender, args) =>
             {
+                _loopThreads.TryRemove(Thread.CurrentThread.ManagedThreadId, out _);
                 _lock.Release();
             };
 
@@ -212,7 +218,7 @@ namespace System.Collections.Concurrent
 
         public int IndexOf(T item)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -226,7 +232,7 @@ namespace System.Collections.Concurrent
 
         public void Insert(int index, T item)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -240,7 +246,7 @@ namespace System.Collections.Concurrent
 
         public bool Remove(T item)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -254,7 +260,7 @@ namespace System.Collections.Concurrent
 
         public void RemoveAt(int index)
         {
-            CheckForLoopThreads();
+            CheckLoopThreads();
             try
             {
                 _lock.Wait();
@@ -266,9 +272,9 @@ namespace System.Collections.Concurrent
             }
         }
 
-        private void CheckForLoopThreads()
+        private void CheckLoopThreads()
         {
-            if (_forThreads.ContainsKey(Thread.CurrentThread.ManagedThreadId))
+            if (_loopThreads.ContainsKey(Thread.CurrentThread.ManagedThreadId))
             {
                 throw new InvalidOperationException("Unable to access ConcurrentList members from within a " +
                     $"{nameof(ForAsync)} or {nameof(ForEachAsync)} loop.");
