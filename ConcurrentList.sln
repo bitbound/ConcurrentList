@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConcurrentList", "ConcurrentList\ConcurrentList.csproj", "{5AECD0F3-DCD9-40CC-B2FD-D145000A42D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConcurrentList", "ConcurrentList\ConcurrentList.csproj", "{5AECD0F3-DCD9-40CC-B2FD-D145000A42D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConcurrentList.Tests", "ConcurrentList.Tests\ConcurrentList.Tests.csproj", "{40145DA1-EB21-4E6F-B962-E86FE467CC15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConcurrentList.Tests", "ConcurrentList.Tests\ConcurrentList.Tests.csproj", "{40145DA1-EB21-4E6F-B962-E86FE467CC15}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{33426681-4DD8-48D6-AE8F-DFB1F6EB303D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
