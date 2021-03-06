@@ -40,9 +40,7 @@ namespace ConcurrentList.Tests
                 for (var i = 0; i < 5_000; i++)
                 {
                     Assert.IsTrue(_list.Remove(500 + i));
-                    _list.RemoveAt(100_000);
-                    _list.Add(42);
-                    _list.Insert(200_000, 100);
+                    Assert.IsTrue(_list.Remove(100_000 + i));
                 }
                 reset1.Set();
             });
@@ -51,8 +49,6 @@ namespace ConcurrentList.Tests
             {
                 for (var i = 5_000; i < 10_000; i++)
                 {
-                    Assert.IsTrue(_list.Remove(500 + i));
-                    _list.RemoveAt(100_000);
                     _list.Add(42);
                     _list.Insert(200_000, 100);
                 }
@@ -63,7 +59,8 @@ namespace ConcurrentList.Tests
             reset2.WaitOne();
 
             Assert.IsFalse(_list.Contains(500));
-            Assert.IsFalse(_list.Contains(100_002));
+            Assert.IsFalse(_list.Contains(100_000));
+            Assert.IsTrue(_list.Contains(42));
             // We should have the original count with which we started.
             Assert.AreEqual(_startCount, _list.Count);
         }
@@ -157,5 +154,42 @@ namespace ConcurrentList.Tests
             reset.WaitOne();
         }
 
+        [TestMethod]
+        public void ConcurrentEnumeratorTests()
+        {
+            var reset = new ManualResetEvent(false);
+
+            // Add and remove items from two separate background threads.
+            _ = Task.Run(() =>
+            {
+                for (var i = 0; i < 5_000; i++)
+                {
+                    Assert.IsTrue(_list.Remove(500 + i));
+                    _list.RemoveAt(100_000);
+                    _list.Add(42);
+                    _list.Insert(200_000, 100);
+                }
+                reset.Set();
+            });
+
+            var cts = new CancellationTokenSource(2000);
+            _ = Task.Run(() =>
+            {
+                while (!cts.Token.IsCancellationRequested)
+                {
+                    foreach (var item in _list)
+                    {
+                        
+                    }
+                }
+            });
+
+            reset.WaitOne();
+            cts.Cancel();
+
+            Assert.IsFalse(_list.Contains(500));
+            // We should have the original count with which we started.
+            Assert.AreEqual(_startCount, _list.Count);
+        }
     }
 }
