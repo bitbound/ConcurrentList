@@ -82,20 +82,6 @@ namespace System.Collections.Concurrent
             }
         }
 
-        public void AddRange(IEnumerable<T> items)
-        {
-            CheckLoopThreads();
-            try
-            {
-                _lock.Wait();
-                _list.AddRange(items);
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
         public void Clear()
         {
             CheckLoopThreads();
@@ -272,20 +258,6 @@ namespace System.Collections.Concurrent
             }
         }
 
-        public void RemoveAll(Predicate<T> predicate)
-        {
-            CheckLoopThreads();
-            try
-            {
-                _lock.Wait();
-                _list.RemoveAll(predicate);
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
         public void RemoveAt(int index)
         {
             CheckLoopThreads();
@@ -293,20 +265,6 @@ namespace System.Collections.Concurrent
             {
                 _lock.Wait();
                 _list.RemoveAt(index);
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
-        public void RemoveRange(int index, int count)
-        {
-            CheckLoopThreads();
-            try
-            {
-                _lock.Wait();
-                _list.RemoveRange(index, count);
             }
             finally
             {

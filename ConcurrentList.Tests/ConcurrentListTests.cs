@@ -37,17 +37,17 @@ namespace ConcurrentList.Tests
             // Add and remove items from two separate background threads.
             _ = Task.Run(() =>
             {
-                for (var i = 0; i < 1_000; i++)
+                for (var i = 0; i < 5_000; i++)
                 {
                     Assert.IsTrue(_list.Remove(500 + i));
-                    _list.RemoveAll(x => x == 100_000 + i);
+                    Assert.IsTrue(_list.Remove(100_000 + i));
                 }
                 reset1.Set();
             });
 
             _ = Task.Run(() =>
             {
-                for (var i = 1_000; i < 2_000; i++)
+                for (var i = 5_000; i < 10_000; i++)
                 {
                     _list.Add(42);
                     _list.Insert(200_000, 100);
