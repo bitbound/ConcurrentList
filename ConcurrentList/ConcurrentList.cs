@@ -1,5 +1,4 @@
-﻿using ConcurrentList;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -182,32 +181,29 @@ namespace System.Collections.Concurrent
         {
             CheckForLoopThreads();
 
-            _lock.Wait();
-
-            var enumerator = new ObservableEnumerator<T>(_list);
-            enumerator.Disposed += (sender, args) =>
+            try
+            {
+                _lock.Wait();
+                return _list.GetEnumerator();
+            }
+            finally
             {
                 _lock.Release();
-            };
-
-            return enumerator;
+            }
         }
-
-       
 
         IEnumerator IEnumerable.GetEnumerator()
         {
             CheckForLoopThreads();
-
-            _lock.Wait();
-
-            var enumerator = new ObservableEnumerator<T>(_list);
-            enumerator.Disposed += (sender, args) =>
+            try
+            {
+                _lock.Wait();
+                return _list.GetEnumerator();
+            }
+            finally
             {
                 _lock.Release();
-            };
-
-            return enumerator;
+            }
         }
 
         public int IndexOf(T item)
