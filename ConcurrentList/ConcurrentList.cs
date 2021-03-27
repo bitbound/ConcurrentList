@@ -15,11 +15,10 @@ namespace System.Collections.Concurrent
     /// <typeparam name="T"></typeparam>
     public class ConcurrentList<T> : IList<T>
     {
+        private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
         private readonly ConcurrentDictionary<int, string> _forThreads = new ConcurrentDictionary<int, string>();
         private readonly List<T> _list = new List<T>();
         private readonly SemaphoreSlim _lock = new SemaphoreSlim(1, 1);
-        private readonly ConcurrentQueue<Action> _actionQueue = new ConcurrentQueue<Action>();
-
         public int Count
         {
             get
@@ -82,6 +81,20 @@ namespace System.Collections.Concurrent
             }
         }
 
+        public void AddRange(IEnumerable<T> collection)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                _list.AddRange(collection);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
         public void Clear()
         {
             CheckForLoopThreads();
@@ -124,6 +137,74 @@ namespace System.Collections.Concurrent
             }
         }
 
+        public bool Exists(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.Exists(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        public List<T> FindAll(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.FindAll(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        public int FindIndex(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.FindIndex(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+        public T FindLast(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.FindLast(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        public int FindLastIndex(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.FindLastIndex(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
         /// <summary>
         /// Perform an action for each index in the List.  You cannot access other members of
         /// this ConcurrentList from within the supplied action.
@@ -281,6 +362,20 @@ namespace System.Collections.Concurrent
             }
         }
 
+        public void RemoveAll(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                _list.RemoveAll(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
         public void RemoveAt(int index)
         {
             CheckForLoopThreads();
@@ -288,6 +383,19 @@ namespace System.Collections.Concurrent
             {
                 _lock.Wait();
                 _list.RemoveAt(index);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+        public void RemoveRange(int index, int count)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                _list.RemoveRange(index, count);
             }
             finally
             {
