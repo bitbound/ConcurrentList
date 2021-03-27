@@ -165,6 +165,20 @@ namespace System.Collections.Concurrent
             }
         }
 
+        public T Find(Predicate<T> predicate)
+        {
+            CheckForLoopThreads();
+            try
+            {
+                _lock.Wait();
+                return _list.Find(predicate);
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
         public int FindIndex(Predicate<T> predicate)
         {
             CheckForLoopThreads();
