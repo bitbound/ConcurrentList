@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ConcurrentList\ConcurrentList.csproj" />
+    <ProjectReference Include="..\Nihs.ConcurrentList\Nihs.ConcurrentList.csproj" />
   </ItemGroup>
 
 </Project>
