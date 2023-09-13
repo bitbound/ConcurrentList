@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Nihs.ConcurrentList</PackageId>
+    <PackageId>Bitbound.ConcurrentList</PackageId>
     <Authors>Jared Goodwin</Authors>
     <Description>A simple, lock-based implementation of a thread-safe list.</Description>
     <Copyright>© 2023 Jared Goodwin</Copyright>
     <RepositoryUrl>https://github.com/lucent-sea/ConcurrentList</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/lucent-sea/ConcurrentList</PackageProjectUrl>
-    <PackageIcon>nihs.png</PackageIcon>
+    <PackageIcon>bitbound.png</PackageIcon>
     <Version>1.0.0</Version>
     <Title>NIHS ConcurrentList</Title>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -18,7 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\.assets\nihs.png">
+    <None Include="..\.assets\bitbound.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

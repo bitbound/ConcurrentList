@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nihs.ConcurrentList
+namespace Bitbound.ConcurrentList
 {
     /// <summary>
     /// A simple, lock-based implementation of a thread-safe List<T>.
