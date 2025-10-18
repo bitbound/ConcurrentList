@@ -23,6 +23,6 @@ jobs:
     with:
       projectOrSlnDir: "./Bitbound.ConcurrentList"
       prerelease: "${{ inputs.prerelease || github.event_name != 'workflow_dispatch' }}"
-      majorVersion: 2
-      minorVersion: 3
+      majorVersion: 1
+      minorVersion: 2
       runTests: true
